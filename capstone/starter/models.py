@@ -6,6 +6,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.declarative import declared_attr
+from sqlalchemy.orm import relationship
 from sqlalchemy.sql.schema import ForeignKey
 from sqlalchemy.sql.sqltypes import Boolean
 from config import init_env_vars
@@ -54,19 +55,19 @@ class Vehicle(db.Model):
     body_style = Column(String)
     color = Column(String)
     currently_rented = Column(Boolean, nullable=False)
-    renter = db.relationship('Customer', backref='vehicle')
-    home_branch = db.relationship('Branch', backref='vehicle')
+    renter_id = relationship('Customer', backref='vehicles', uselist=False)
+    home_branch_id = relationship('Branch', backref='vehicles', uselist=False)
 
-    def __init__(self, make, model, year, lic_plate, body_style, color,
-                currently_rented, renter, home_branch):
+    def __init__(self, make, model, year, body_style, color,
+                currently_rented, renter_id, home_branch_id):
         self.make = make
         self.model = model
         self.year = year
         self.body_style = body_style
         self.color = color
         self.currently_rented = currently_rented
-        self.renter = renter
-        self.home_branch = home_branch
+        self.renter_id = renter_id
+        self.home_branch_id = home_branch_id
 
     def insert(self):
         db.session.add(self)
@@ -87,8 +88,8 @@ class Vehicle(db.Model):
             'body_style': self.body_style,
             'color': self.color,
             'currently_rented': self.currently_rented,
-            'renter': self.renter,
-            'home_branch': self.home_branch
+            'renter_id': self.renter_id,
+            'home_branch_id': self.home_branch_id
         }
 
 class Person(db.Model):
@@ -138,7 +139,8 @@ class Branch(db.Model):
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
     address = Column(String, nullable=False)
-    staff = db.relationship('Staff', backref='branch')
+    # staff = relationship('Staff', backref='branch')
+    vehicle_id = Column(Integer, ForeignKey('vehicle.id'))
 
     def __init__(self, name, address, staff):
         self.name = name
@@ -166,6 +168,7 @@ class Customer(Person):
     __tablename__ = 'customer'
 
     id = Column(Integer, primary_key=True)
+    vehicle_id = Column(Integer, ForeignKey('vehicle.id'))
 
 
 class Staff(Person):
