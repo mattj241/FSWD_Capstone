@@ -139,6 +139,7 @@ Total list:
 
 GET /vehicles
 Returns a list of vehicles in the database
+```
 {
     "message": "OK",
     "success": 200,
@@ -154,9 +155,10 @@ Returns a list of vehicles in the database
         }
     ]
 }
-
+```
 GET /vehicles/<id>
 Returns a particular vehicle in the database
+```
 {
     "message": "OK",
     "success": 200,
@@ -170,9 +172,11 @@ Returns a particular vehicle in the database
         "year": 2020
     }
 }
-
+```
+ 
 GET /customers
 Returns a list of customers in the database
+```
 {
     "customers": [
         {
@@ -186,9 +190,11 @@ Returns a list of customers in the database
     "message": "OK",
     "success": 200
 }
-
+```
+ 
 GET /employees
 Returns a list of employees in the database
+```
 {
     "employees": [
         {
@@ -203,9 +209,11 @@ Returns a list of employees in the database
     "message": "OK",
     "success": 200
 }
-
+```
+ 
 GET /managers
 Returns a list of managers in the database
+```
 {
     "managers": [
         {
@@ -219,9 +227,11 @@ Returns a list of managers in the database
     "message": "OK",
     "success": 200
 }
+```
 
 GET /reservations
 Returns a list of reservations
+```
 {
     "message": "OK",
     "reservations": [
@@ -237,9 +247,11 @@ Returns a list of reservations
     ],
     "success": 200
 }
+```
 
 POST /customers
 Add a customer to the database
+```
 Request example:
 {
     "first_name": "Sivaram",
@@ -251,9 +263,11 @@ Response:
     "message": "Customer added",
     "success": 201
 }
+```
 
 POST /employees
 Add a employee to the database
+```
 Request example:
 {
     "first_name": "Richard",
@@ -266,9 +280,11 @@ Response:
     "message": "Employee added",
     "success": 201
 }
-
+```
+ 
 POST /managers
 Add a manager to the database
+```
 Request example:
 {
     "first_name": "Matt",
@@ -280,9 +296,11 @@ Response:
     "message": "Manager added",
     "success": 201
 }
+```
 
 POST /reservations
 Add a reseravation to the database
+```
 request example:
 {
     "vehicle_id": 1,
@@ -295,9 +313,11 @@ response example:
     "message": "Reservation added",
     "success": 201
 }
+```
 
 POST /vehicles
 Add A vehicle to the database
+```
 Request Example:
 {
     "make": "Ford",
@@ -311,9 +331,11 @@ Response
     "message": "Vehicle added",
     "success": 201
 }
-
+```
+ 
 PATCH /reservations/<id>
 Update an existing reservation
+```
 Request example:
 {
     "cost" : 45.00
@@ -334,9 +356,11 @@ Response example:
         }
     ]
 }
+```
 
 PATCH /vehicles/<id>
 Update a certain vehicle's information
+```
 Request example:
 {
     "make" : "Chevrolet",
@@ -358,11 +382,14 @@ Response:
         }
     ]
 }
+```
 
 DELETE /vehicles/<id>
 Deleting a vehicle as long as it doesn't have an active reservation
+```
 Response Example: 
 {
     "message": "Vehicle deleted",
     "success": 200
 }
+```
