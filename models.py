@@ -37,9 +37,25 @@ setup_db(app)
 def setup_db(app, database_path=database_path):
     app.config["SQLALCHEMY_DATABASE_URI"] = database_path
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-    db.app = app
-    db.init_app(app)
-    db.create_all()
+    # SQLAlchemy will check if the items exist before trying to
+    # create them, which is a race condition. If it raises an error
+    # in one iteration, the next may pass all the existence checks
+    # and the call will succeed.
+    max_retries = 10
+    retries = 0
+    while True:
+        try:
+            db.app = app
+            db.init_app(app)
+            db.create_all()
+        except sqlalchemy.exc.IntegrityError:
+            if retries < max_retries:
+                os.times.sleep(100)
+                retries += 1
+            else:
+                raise
+        else:
+            break
     Migrate(app, db)
 
 def session_revert():
