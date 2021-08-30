@@ -7,7 +7,7 @@ from flask_migrate import Migrate
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.orm import backref, relationship
-from sqlalchemy.sql.expression import false
+from sqlalchemy.sql.expression import false, null
 from sqlalchemy.sql.schema import ForeignKey, PrimaryKeyConstraint, Table, MetaData
 from sqlalchemy.sql.sqltypes import Boolean, Float
 from config import init_env_vars
@@ -15,7 +15,7 @@ Base = declarative_base()
 
 
 init_env_vars()
-database_name = "car_rental"
+database_name = os.getenv('DB_NAME') 
 database_username = os.getenv('DB_USER') 
 database_password = os.getenv('DB_PASSWORD')
 database_path = "postgresql://{}:{}@{}/{}"\
@@ -47,16 +47,59 @@ Schema Configuration
 '''
 class Reservation (db.Model):
     __tablename__ = 'reservation'
-    vehicle_id = Column(Integer, ForeignKey('vehicle.id'),   primary_key=True)
-    customer_id = Column(Integer, ForeignKey('customer.id'), primary_key=True)
-    employee_id = Column(Integer, ForeignKey('employee.id'), primary_key=True)
-    # implementing time always sucks, will come back if enough time
+    id = Column(Integer, primary_key=True)
+    vehicle_id = Column(Integer, ForeignKey('vehicle.id'), nullable=False)
+    customer_id = Column(Integer, ForeignKey('customer.id'), nullable=False)
+    employee_id = Column(Integer, ForeignKey('employee.id'), nullable=False)
+    # implemented the time attrib, if time allows
     # start_time = 
     # end_time = 
     cost = Column(Float, nullable=False)
+    reservation_open = Column(Boolean, nullable=False)
     vehicle  = relationship('Vehicle', uselist=False, foreign_keys=[vehicle_id])
     customer = relationship('Customer', uselist=False, foreign_keys=[customer_id])
     employee = relationship('Employee', uselist=False, foreign_keys=[employee_id])
+
+    def __init__(self, vehicle_id, customer_id,
+                 employee_id, cost, reservation_open):
+        self.vehicle_id = vehicle_id
+        self.customer_id = customer_id
+        self.employee_id = employee_id
+        self.cost = cost
+        self.reservation_open = reservation_open
+
+    def insert(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def update(self):
+        db.session.commit()
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+
+    def get_cust_info(id):
+        return Customer.query.filter_by(id=id).first()
+    
+    def get_emp_info(id):
+        return Employee.query.filter_by(id=id).first()
+    
+    def get_veh_info(id):
+        return Vehicle.query.filter_by(id=id).first()
+    
+    def format(self):
+        customer = Reservation.get_cust_info(self.customer_id)
+        employee = Reservation.get_emp_info(self.employee_id)
+        vehicle = Reservation.get_veh_info(self.vehicle_id)
+        return {
+            'cost': self.cost,
+            'customer_name': customer.first_name + ' ' + customer.last_name,
+            'employee_name': employee.first_name + ' ' + employee.last_name,
+            'vehicle_id': self.vehicle_id,
+            'vehicle_make_and_model': vehicle.make + ' ' + vehicle.model,
+            'reservation_open' : self.reservation_open
+        }
 
 class Vehicle(db.Model):
     __tablename__= 'vehicle'
@@ -232,3 +275,34 @@ class Employee(Person, db.Model):
             'type' : self.type,
             'manager_id' : self.manager_id
         }
+
+'''
+Helper functions
+
+'''
+def get_vehicle(id):
+    if id <= 0:
+        return Vehicle.query.all()
+    else:
+        return Vehicle.query.filter_by(id=id).first()
+
+def get_customer(id):
+    if not id:
+        return Customer.query.all()
+    else:
+        return Customer.query.filter_by(id=id).first()
+
+def get_employee(id):
+    if not id:
+        return Employee.query.all()
+    else:
+        return Employee.query.filter_by(id=id).first()
+
+def get_manager(id):
+    if not id:
+        return Manager.query.all()
+    else:
+        return Manager.query.filter_by(id=id).first()
+
+def get_reservation():
+    return Reservation.query.all()
