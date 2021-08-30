@@ -15,11 +15,17 @@ Base = declarative_base()
 
 
 init_env_vars()
-database_name = os.getenv('DB_NAME') 
-database_username = os.getenv('DB_USER') 
-database_password = os.getenv('DB_PASSWORD')
-database_path = "postgresql://{}:{}@{}/{}"\
-  .format(database_username, database_password, 'localhost:5432', database_name)
+
+### UNCOMMENT these below vars to enable for local
+
+# database_name = os.getenv('DB_NAME') 
+# database_username = os.getenv('DB_USER') 
+# database_password = os.getenv('DB_PASSWORD')
+# database_path = "postgresql://{}:{}@{}/{}"\
+#   .format(database_username, database_password, 'localhost:5432', database_name)
+
+
+database_path = os.environ['HEROKU_DB_PATH']
 
 db = SQLAlchemy()
 
