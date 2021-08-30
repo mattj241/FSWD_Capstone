@@ -25,7 +25,8 @@ init_env_vars()
 #   .format(database_username, database_password, 'localhost:5432', database_name)
 
 # HEROKU REQUIREMENTS
-database_path = os.environ['HEROKU_DB_PATH']
+database_path = os.environ.get('DATABASE_URL').replace("://", "ql://", 1)
+
 
 db = SQLAlchemy()
 
