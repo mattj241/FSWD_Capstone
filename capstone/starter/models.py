@@ -93,6 +93,7 @@ class Reservation (db.Model):
         employee = Reservation.get_emp_info(self.employee_id)
         vehicle = Reservation.get_veh_info(self.vehicle_id)
         return {
+            'id' : self.id,
             'cost': self.cost,
             'customer_name': customer.first_name + ' ' + customer.last_name,
             'employee_name': employee.first_name + ' ' + employee.last_name,
@@ -164,19 +165,17 @@ class Customer(Person):
     __tablename__ = 'customer'
 
     id = Column(Integer, primary_key=True)
-    currently_renting = Column(Boolean, nullable=False)
     reservations = relationship('Reservation', back_populates='customer')
 
     __mapper_args__ = {
         'polymorphic_identity':'customer'
     }
 
-    def __init__(self, first_name, last_name, address, type, currently_renting):
+    def __init__(self, first_name, last_name, address, type):
         self.first_name = first_name
         self.last_name = last_name
         self.address = address
         self.type = type
-        self.currently_renting = currently_renting
 
     def insert(self):
         db.session.add(self)
@@ -196,7 +195,6 @@ class Customer(Person):
             'last_name' : self.last_name,
             'address' : self.address,
             'type' : self.type,
-            'currently_renting' : self.currently_renting
         }
 
 

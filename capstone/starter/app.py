@@ -183,7 +183,7 @@ def create_app(test_config=None):
                             data['last_name'],
                             data['address'],
                             data['type'],
-                            data['currently_renting'])
+                            "customer")
       Customer.insert(new_cust)
       return jsonify({
         "success" : 201,
@@ -219,7 +219,7 @@ def create_app(test_config=None):
       new_manager = Manager(data['first_name'],
                             data['last_name'],
                             data['address'],
-                            data['type'])
+                            "manager")
       Manager.insert(new_manager)
       return jsonify({
         "success" : 201,
@@ -255,7 +255,7 @@ def create_app(test_config=None):
       new_emp = Employee(data['first_name'],
                             data['last_name'],
                             data['address'],
-                            data['type'],
+                            "employee",
                             data['manager_id'])
       Employee.insert(new_emp)
       return jsonify({
@@ -285,10 +285,10 @@ def create_app(test_config=None):
   
   @app.route('/reservations', methods=['POST'])
   @requires_auth('add:reservation')
-  def add_reservations():
+  def add_reservations(jwt):
     data = request.get_json()
     try:
-      target_vehicle = Vehicle.query.filter(id = data['vehicle_id']).first()
+      target_vehicle = Vehicle.query.filter(Vehicle.id==data['vehicle_id']).first()
       if target_vehicle is None:
         abort(404)
       if target_vehicle.currently_rented:
@@ -314,32 +314,32 @@ def create_app(test_config=None):
   def update_reservation(jwt, id):
     data = request.get_json()
     try:
-        target_reservation = Reservation.query.filter(id=id).first()
-        if target_reservation is None:
-          abort(404)
-        if "cost" in data:
-            target_reservation.cost = data['cost']
-        if "vehicle_id" in data:
-          # check to make sure when patching a reservation 
-          # the new vehicle is not already being rented out!
-          target_vehicle = Vehicle.query.filter(id=data['vehicle_id']).first()
-          if target_vehicle.currently_rented:
-            abort(422)
-          else:
-            target_reservation.vehicle_id = data['vehicle_id']
-        if "reservation_open" in data:
-          target_reservation.reservation_open = data['reservation_open']
-        if "customer_id" in data:
-            target_reservation.customer_id = data['customer_id']
-        if "employee_id" in data:
-            target_reservation.employee_id = data['employee_id']
-        Vehicle.update(target_vehicle)
-        updated_vehicle = Vehicle.query.filter(Vehicle.id == target_vehicle.id).first()
-        return jsonify({
-            "success" : 200,
-            "message" : "Vehicle updated",
-            "updated_vehicle" : [updated_vehicle.format()]
-        })
+      target_reservation = Reservation.query.filter(Reservation.id==id).first()
+      if target_reservation is None:
+        abort(404)
+      if "cost" in data:
+          target_reservation.cost = data['cost']
+      if "vehicle_id" in data:
+        # check to make sure when patching a reservation 
+        # the new vehicle is not already being rented out!
+        target_vehicle = Vehicle.query.filter(id=data['vehicle_id']).first()
+        if target_vehicle.currently_rented:
+          abort(422)
+        else:
+          target_reservation.vehicle_id = data['vehicle_id']
+          Vehicle.update(target_vehicle)
+      if "reservation_open" in data:
+        target_reservation.reservation_open = data['reservation_open']
+      if "customer_id" in data:
+          target_reservation.customer_id = data['customer_id']
+      if "employee_id" in data:
+          target_reservation.employee_id = data['employee_id']
+      updated_reservation = Reservation.query.filter(Reservation.id==id).first()
+      return jsonify({
+          "success" : 200,
+          "message" : "Reservation updated",
+          "updated_vehicle" : [updated_reservation.format()]
+      })
     except sqlalchemy.orm.exc.UnmappedInstanceError:
         session_revert()
         abort(404)
