@@ -24,7 +24,7 @@ init_env_vars()
 # database_path = "postgresql://{}:{}@{}/{}"\
 #   .format(database_username, database_password, 'localhost:5432', database_name)
 
-# HEROKU REQUIREMENTS
+### HEROKU REQUIREMENTS
 database_path = os.environ.get('DATABASE_URL').replace("://", "ql://", 1)
 
 
@@ -63,9 +63,9 @@ class Reservation (db.Model):
     # end_time = 
     cost = Column(Float, nullable=False)
     reservation_open = Column(Boolean, nullable=False)
-    vehicle  = relationship('Vehicle', uselist=False, foreign_keys=[vehicle_id])
-    customer = relationship('Customer', uselist=False, foreign_keys=[customer_id])
-    employee = relationship('Employee', uselist=False, foreign_keys=[employee_id])
+    vehicle =relationship('Vehicle', uselist=False, foreign_keys=[vehicle_id])
+    customer=relationship('Customer', uselist=False, foreign_keys=[customer_id])
+    employee=relationship('Employee', uselist=False, foreign_keys=[employee_id])
 
     def __init__(self, vehicle_id, customer_id,
                  employee_id, cost, reservation_open):

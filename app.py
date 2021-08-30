@@ -69,7 +69,6 @@ def create_app(test_config=None):
                             data['color'],
                             False)
       Vehicle.insert(new_vehicle)
-      status_code = Response(status=201)
       return jsonify({
         "success" : 201,
         "message" : "Vehicle added",
@@ -86,6 +85,7 @@ def create_app(test_config=None):
     data = request.get_json()
     try:
         target_vehicle = Vehicle.query.filter(Vehicle.id==id).first()
+        # if vehicle id is not found, abort 404
         if target_vehicle is None:
           abort(404)
         if "make" in data:
@@ -106,7 +106,8 @@ def create_app(test_config=None):
         else:
           target_vehicle.currently_rented = True
         Vehicle.update(target_vehicle)
-        updated_vehicle = Vehicle.query.filter(Vehicle.id == target_vehicle.id).first()
+        updated_vehicle =\
+           Vehicle.query.filter(Vehicle.id == target_vehicle.id).first()
         return jsonify({
             "success" : 200,
             "message" : "Vehicle updated",
@@ -129,6 +130,7 @@ def create_app(test_config=None):
   def remove_vehicle(jwt, id):
     try:
         target_vehicle = Vehicle.query.filter(Vehicle.id==id).first()
+        # if vehicle is currently being rented, it cannot be deleted. Abort 422.
         if target_vehicle.currently_rented:
           abort(422)
         Vehicle.delete(target_vehicle)
@@ -276,9 +278,12 @@ def create_app(test_config=None):
   def add_reservations(jwt):
     data = request.get_json()
     try:
-      target_vehicle = Vehicle.query.filter(Vehicle.id==data['vehicle_id']).first()
+      target_vehicle = \
+        Vehicle.query.filter(Vehicle.id==data['vehicle_id']).first()
       if target_vehicle is None:
         abort(404)
+      # A reservation can not be opened with a car already being rented,
+      # Therefore will cause an abort 422
       if target_vehicle.currently_rented:
         abort(422)
       # All new reservations default "True" for last Reservation param attribute
@@ -310,8 +315,8 @@ def create_app(test_config=None):
       if "cost" in data:
           target_reservation.cost = data['cost']
       if "vehicle_id" in data:
-        # check to make sure when patching a reservation 
-        # the new vehicle is not already being rented out!
+        # Cannot update a reservation using a vehicle that is already rented 
+        # out, will abort for 422
         target_vehicle = Vehicle.query.filter(id=data['vehicle_id']).first()
         if target_vehicle.currently_rented:
           abort(422)

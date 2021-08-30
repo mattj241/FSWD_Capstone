@@ -49,7 +49,7 @@ create database <TEST_DB_NAME>;
 ### Flask APP Setup for development 
 
 Please follow the steps above to create the database and link the app to your created postgre databases.
-Then:
+Then, in models.py, uncomment the local database configuration lines of code (lines 21-25), and comment out the database string used for HEROKU on line 28.
 ```
 export FLASK_APP=app.py
 export FLASK_ENV=development
@@ -68,7 +68,8 @@ export FLASK_APP=app.py
 export FLASK_ENV=development
 python -m test_app
 ```
-
+*Hint:
+Bearer tokens have already been included for local testing within the env file "config.py" 
 
 ### Hosted URL
 https://fsnd-capstone-j.herokuapp.com
