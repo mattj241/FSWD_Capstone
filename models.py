@@ -1,9 +1,11 @@
 import os
 import enum
+import time
 from typing import Counter
 from sqlalchemy import Column, String, Integer, create_engine
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+import sqlalchemy
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.orm import backref, relationship
@@ -37,11 +39,18 @@ setup_db(app)
 def setup_db(app, database_path=database_path):
     app.config["SQLALCHEMY_DATABASE_URI"] = database_path
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-    db.app = app
-    db.init_app(app)
-    # db.drop_all()
-    db.create_all()
-    # Migrate(app, db)
+    while True:
+        try:
+            db.app = app
+            db.init_app(app)
+            db.create_all()
+            # Migrate(app, db)
+        except sqlalchemy.exc.IntegrityError:
+            db.drop_all()
+            time.sleep(5)
+            # pass
+        
+    
 
 def session_revert():
   db.session.rollback()
