@@ -22,25 +22,9 @@ def create_app(test_config=None):
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response
 
-  # @app.route('/', methods=['GET'])
-  # def login():
-  
-  #   conn = http.client.HTTPSConnection("mattj.us.auth0.com")
-
-  #   payload = "{\"client_id\":\"NawlWTmEBXnlmyFbp45NCvAOJ4kf4CzI\",\"client_secret\":\"HxtdbaHcrWJQ_sQtoyJJJ2jm8BOSWeZXOGc5d27md6xNdGNyk36X-ZRlnvUc8Spx\",\"audience\":\"capstone\",\"grant_type\":\"client_credentials\"}"
-
-  #   headers = { 'content-type': "application/json" }
-
-  #   conn.request("POST", "/oauth/token", payload, headers)
-
-  #   res = conn.getresponse()
-  #   data = res.read()
-  #   decoded_data = data.decode("utf-8")
-  #   json_obj = json.loads(decoded_data)
-  #   return jsonify({
-  #     "auth_token" : json_obj['access_token'],
-  #     "token_type" : json_obj['token_type']
-  #   })
+  @app.route('/')
+  def index():
+    abort(400)
 
   @app.route('/vehicles',  methods=['GET'])
   def vehicles():
@@ -75,26 +59,26 @@ def create_app(test_config=None):
   @requires_auth('add:vehicle')
   def add_vehicle(jwt):
     data = request.get_json()
-    # try:
+    try:
     # All new cehicles default "False" for last Vehicle param attribute
     # "currently_rented"
-    new_vehicle = Vehicle(data['make'],
-                          data['model'],
-                          data['year'],
-                          data['body_style'],
-                          data['color'],
-                          False)
-    Vehicle.insert(new_vehicle)
-    status_code = Response(status=201)
-    return jsonify({
-      "success" : 201,
-      "message" : "Vehicle added",
-    }), 201
-    # except Exception:
-    #   session_revert()
-    #   abort(422)
-    # finally:
-    #   session_close()
+      new_vehicle = Vehicle(data['make'],
+                            data['model'],
+                            data['year'],
+                            data['body_style'],
+                            data['color'],
+                            False)
+      Vehicle.insert(new_vehicle)
+      status_code = Response(status=201)
+      return jsonify({
+        "success" : 201,
+        "message" : "Vehicle added",
+      }), 201
+    except Exception:
+      session_revert()
+      abort(422)
+    finally:
+      session_close()
 
   @app.route('/vehicles/<int:id>', methods=['PATCH'])
   @requires_auth('update:vehicle')
@@ -145,6 +129,8 @@ def create_app(test_config=None):
   def remove_vehicle(jwt, id):
     try:
         target_vehicle = Vehicle.query.filter(Vehicle.id==id).first()
+        if target_vehicle.currently_rented:
+          abort(422)
         Vehicle.delete(target_vehicle)
         return jsonify({
             "success" : 200,
@@ -154,6 +140,9 @@ def create_app(test_config=None):
         session_revert()
         abort(404)
     except TypeError:
+        session_revert()
+        abort(404)
+    except AttributeError:
         session_revert()
         abort(404)
     finally:
@@ -182,7 +171,6 @@ def create_app(test_config=None):
       new_cust = Customer(data['first_name'],
                             data['last_name'],
                             data['address'],
-                            data['type'],
                             "customer")
       Customer.insert(new_cust)
       return jsonify({
@@ -190,8 +178,8 @@ def create_app(test_config=None):
         "message" : "Customer added" 
       }), 201
     except Exception:
-      session_revert()
-      abort(422)
+        session_revert()
+        abort(422)
     finally:
       session_close()
 
@@ -300,12 +288,14 @@ def create_app(test_config=None):
                             data['employee_id'],
                             data['cost'],
                             True)  
-      new_res.reservation_open = True
       Reservation.insert(new_res)
       return jsonify({
         "success" : 201,
         "message" : "Reservation added" 
       }), 201
+    except sqlalchemy.exc.IntegrityError:
+      session_revert()
+      abort(422)
     finally:
       session_close()
 
@@ -359,6 +349,13 @@ def create_app(test_config=None):
         "error": error.description,
         "message": error.code['code']
     }), error.description
+
+  @app.errorhandler(400)
+  def unprocessable(error):
+      return jsonify({
+          "error": 400,
+          "message": "Bad request"
+      }), 400
     
   @app.errorhandler(422)
   def unprocessable(error):
