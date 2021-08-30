@@ -17,15 +17,15 @@ A Web App about Car Rentals
 2. **Virtual Enviornment** - We recommend working within a virtual environment whenever using Python for projects. This keeps your dependencies for each project separate and organaized. Instructions for setting up a virual enviornment for your platform can be found in the [python docs](https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/)
 
 
-3. **PIP Dependencies** - Once you have your virtual environment setup and running, install dependencies by naviging to the `/starter` directory and running:
+3. **PIP Dependencies** - Once you have your virtual environment setup and running, install dependencies by naviging to the root directory and running:
 ```bash
 pip install -r requirements.txt
 ```
 This will install all of the required packages we selected within the `requirements.txt` file.
 
 
-### Database Setup (LOCAL)
-This app is developed with postgre SQL in mind. By navigating the `/starter` directory,
+### Local Database setup
+This app is developed with postgre SQL in mind. In the root directory,
 there is a env setup file called "config.py". Update the following:
 
 ```
@@ -45,13 +45,43 @@ psql -U <DB_USER>
 create database <DB_NAME>;
 create database <TEST_DB_NAME>;
 ```
- # Hosted URL
+
+### Flask APP Setup for development 
+
+Please follow the steps above to create the database and link the app to your created postgre databases.
+Then:
+```
+export FLASK_APP=app.py
+export FLASK_ENV=development
+python -m flask run
+```
+Then use Postman to start pinging the endpoints below, including authorization when necessary, using your local server. 
+For example:
+```
+http://127.0.0.1:5000/vehicles
+```
+### Flask APP Setup for unit testing
+Please follow the steps above to create the database and link the app to your created postgre databases.
+Then:
+```
+export FLASK_APP=app.py
+export FLASK_ENV=development
+python -m test_app
+```
 
 
- # How to setup Authentication
- See explanation of Roles in the following section.
+### Hosted URL
+https://fsnd-capstone-j.herokuapp.com
 
- https://mattj.us.auth0.com/authorize?audience=capstone&response_type=token&client_id=NawlWTmEBXnlmyFbp45NCvAOJ4kf4CzI&redirect_uri=https://www.google.com
+Use this URL to ping the hosted web app
+
+Example using Postman:
+```
+https://fsnd-capstone-j.herokuapp.com/vehicles
+```
+
+### Authentication/Authorization
+ Bearer Tokens have been provided due to the implicit nature of this app. If a new user logged in, they would need to be granted a RBAC role to gain further access to the system.
  
  RBAC Role token for Manager: eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImFOZDFNWk5pWWs2WUIzWjZscGJVRCJ9.eyJpc3MiOiJodHRwczovL21hdHRqLnVzLmF1dGgwLmNvbS8iLCJzdWIiOiJnb29nbGUtb2F1dGgyfDEwMDQwNzQzMjQ4NDE0MTE0NzkzNyIsImF1ZCI6ImNhcHN0b25lIiwiaWF0IjoxNjMwMjk3ODExLCJleHAiOjE2MzAzODQyMTEsImF6cCI6Ik5hd2xXVG1FQlhubG15RmJwNDVOQ3ZBT0o0a2Y0Q3pJIiwic2NvcGUiOiIiLCJwZXJtaXNzaW9ucyI6WyJhZGQ6Y3VzdG9tZXIiLCJhZGQ6ZW1wbG95ZWUiLCJhZGQ6bWFuYWdlciIsImFkZDpyZXNlcnZhdGlvbiIsImFkZDp2ZWhpY2xlIiwiZGVsZXRlOnZlaGljbGUiLCJnZXQ6Y3VzdG9tZXIiLCJnZXQ6ZW1wbG95ZWUiLCJnZXQ6bWFuYWdlciIsImdldDpyZXNlcnZhdGlvbiIsInVwZGF0ZTpjdXN0b21lciIsInVwZGF0ZTplbXBsb3llZSIsInVwZGF0ZTptYW5hZ2VyIiwidXBkYXRlOnJlc2VydmF0aW9uIiwidXBkYXRlOnZlaGljbGUiXX0.W2vq7cyO17aqk4B5RE6TIWxIZJszy6HV_JdgjFClWbYbki98MFu9-IgVjk6VyBQdjf5JX67N1g7_lRlhoiY8PNB89ayUL_kLK9X_FkUA3cjexFoLR2xRsnJtpnMgvnc0Kj1V2ZxiLIXvzwmU6Pv2fItyEXd2hcxTLUFMsUM5_0UnpVS6ZnKlXWL6pmlrLaKADcSS80j5ixCxMnxCX3bb_uDi5QvjwnlhYBqAuZi-gB_gn5ZVDxbfo0UzQOiI_j2OCpomCBGdpqFyjVVJIRpQK1VnEFzAlK2IyOzdutqbXlS9aD3ntxg0oo5CBiXJJBxLMt5USs1dSXwZs425somc7g
 
